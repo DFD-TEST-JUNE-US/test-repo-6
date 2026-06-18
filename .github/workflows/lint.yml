@@ -1,0 +1,86 @@
+name: Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install linters
+      run: pip install flake8 pylint
+    - name: Run flake8
+      run: flake8 src/python --count --select=E9,F63,F7,F82 --show-source --statistics
+      continue-on-error: true
+    - name: Run pylint
+      run: pylint src/python --exit-zero
+      continue-on-error: true
+
+  lint-javascript:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Install ESLint
+      run: npm install -g eslint
+    - name: Run ESLint on Node.js
+      run: eslint src/nodejs --no-eslintrc --env node,es2020 || true
+      continue-on-error: true
+    - name: Run ESLint on TypeScript
+      run: eslint src/typescript --no-eslintrc --env node,es2020 --ext .ts || true
+      continue-on-error: true
+
+  lint-go:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+    - name: Run go vet
+      run: |
+        cd src/go
+        go vet ./...
+      continue-on-error: true
+
+  lint-ruby:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+    - name: Install RuboCop
+      run: gem install rubocop
+    - name: Run RuboCop
+      run: rubocop src/ruby --format simple || true
+      continue-on-error: true
+
+  lint-csharp:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    - name: Install dotnet-format
+      run: dotnet tool install -g dotnet-format
+    - name: Run dotnet format check
+      run: |
+        dotnet format src/csharp-console/ConsoleApp.csproj --verify-no-changes || true
+        dotnet format src/csharp-web/WebApp.csproj --verify-no-changes || true
+      continue-on-error: true

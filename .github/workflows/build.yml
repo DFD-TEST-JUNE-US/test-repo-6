@@ -1,0 +1,98 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-dotnet:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    - name: Build C# Console App
+      run: dotnet build src/csharp-console/ConsoleApp.csproj
+    - name: Build C# Web App
+      run: dotnet build src/csharp-web/WebApp.csproj
+
+  build-node:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Install Node.js dependencies
+      run: |
+        cd src/nodejs
+        npm install
+    - name: Install TypeScript dependencies
+      run: |
+        cd src/typescript
+        npm install
+
+  build-python:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        cd src/python
+        pip install -r requirements.txt
+
+  build-go:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+    - name: Build Go App
+      run: |
+        cd src/go
+        go build -v ./...
+
+  build-java:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Compile Java
+      run: |
+        cd src/java
+        javac App.java
+
+  build-rust:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+    - name: Build Rust App
+      run: |
+        cd src/rust
+        cargo build --verbose
+
+  build-cpp:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build C++ App
+      run: |
+        cd src/cpp
+        make
